@@ -280,6 +280,11 @@
       font-size: 3rem;
       border-bottom: 1px solid var(--border);
       background: #f8f6f3;
+      border-left: 0;
+      border-right: 0;
+      border-top: 0;
+      width: 100%;
+      cursor: pointer;
     }
     .product-body { padding: .95rem; display: flex; flex-direction: column; gap: .4rem; }
     .meta { font-size: .72rem; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
@@ -381,6 +386,101 @@
     }
     .modal-note { color: var(--muted); font-size: .85rem; }
 
+    .product-modal-card {
+      background: var(--surface);
+      border-radius: 12px;
+      width: min(920px, 100%);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 1rem;
+    }
+    .gallery-main {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #f9f7f4;
+      min-height: 320px;
+      display: grid;
+      place-items: center;
+      font-size: 5rem;
+      position: relative;
+    }
+    .gallery-caption {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      background: rgba(0,0,0,.7);
+      color: #fff;
+      padding: .2rem .5rem;
+      border-radius: 999px;
+      font-size: .75rem;
+    }
+    .gallery-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: .4rem;
+    }
+    .gallery-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 6px;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+    }
+    .thumbs {
+      margin-top: .7rem;
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .thumb-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 8px;
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 1.3rem;
+    }
+    .thumb-btn.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .detail-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: .5rem;
+    }
+    .detail-meta {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .detail-title {
+      margin: .2rem 0;
+      font-family: var(--serif);
+      font-size: clamp(1.4rem, 2.6vw, 2rem);
+      line-height: 1.2;
+    }
+    .detail-desc { color: var(--muted); margin: .5rem 0 1rem; }
+    .specs {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .8rem;
+      background: #fff;
+      margin-bottom: 1rem;
+    }
+    .specs h4 { margin: 0 0 .45rem; font-size: .95rem; }
+    .specs ul { margin: 0; padding-left: 1.1rem; }
+    .specs li { font-size: .9rem; margin: .2rem 0; }
+
     .toast {
       position: fixed;
       right: 12px;
@@ -406,6 +506,8 @@
       .nav-links { display: none; }
       .filters { grid-template-columns: 1fr; }
       .hero-art { display: none; }
+      .product-modal-card { grid-template-columns: 1fr; }
+      .gallery-main { min-height: 240px; font-size: 4rem; }
     }
   </style>
 </head>
@@ -554,15 +656,77 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <div id="productModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="productDetailTitle" aria-hidden="true">
+    <div class="product-modal-card">
+      <div>
+        <div class="gallery-main" id="galleryMain" aria-live="polite">
+          <div id="galleryMainVisual">🖼️</div>
+          <div class="gallery-caption" id="galleryCaption">1 / 1</div>
+          <div class="gallery-controls">
+            <button type="button" class="gallery-btn" id="galleryPrev" aria-label="Predchádzajúca fotka">‹</button>
+            <button type="button" class="gallery-btn" id="galleryNext" aria-label="Ďalšia fotka">›</button>
+          </div>
+        </div>
+        <div class="thumbs" id="galleryThumbs"></div>
+      </div>
+      <div>
+        <div class="detail-head">
+          <span class="detail-meta" id="productDetailCategory">Kategória</span>
+          <button type="button" id="closeProductModal" aria-label="Zatvoriť detail produktu">✕</button>
+        </div>
+        <h3 class="detail-title" id="productDetailTitle">Produkt</h3>
+        <p class="detail-desc" id="productDetailDesc"></p>
+        <div class="specs">
+          <h4>Rýchly prehľad</h4>
+          <ul id="productDetailSpecs"></ul>
+        </div>
+        <div class="bottom">
+          <span class="price" id="productDetailPrice">0,00 €</span>
+          <button type="button" class="btn-buy" id="productDetailAction">Do košíka</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     (() => {
       const products = [
-        { id: 1, name: "Aromatická sójová sviečka", category: "Dekorácie & Sviečky", price: 14.9, stock: true, icon: "🕯️" },
-        { id: 2, name: "Kvetináč z terakoty — set 3 ks", category: "Rastliny & Kvetináče", price: 22.5, stock: true, icon: "🪴" },
-        { id: 3, name: "Minimalistická tlač A3", category: "Obrazy & Tlače", price: 18, stock: false, icon: "🖼️" },
-        { id: 4, name: "Darčekový balíček — Hygge home", category: "Darčeky", price: 36.9, stock: true, icon: "🎁" },
-        { id: 5, name: "Nástenné zrkadlo — ratanový rám", category: "Dekorácie & Sviečky", price: 44.9, stock: false, icon: "🪞" },
-        { id: 6, name: "Umelá zelená stena 40×40 cm", category: "Rastliny & Kvetináče", price: 29, stock: true, icon: "🌿" }
+        {
+          id: 1, name: "Aromatická sójová sviečka", category: "Dekorácie & Sviečky", price: 14.9, stock: true, icon: "🕯️",
+          description: "Ručne liata sójová sviečka s jemnou vôňou vanilky. Horí čisto a dlho.",
+          specs: ["Objem: 220 ml", "Doba horenia: ~42 hodín", "Materiál: prírodný sójový vosk"],
+          photos: ["🕯️", "✨", "🏠"]
+        },
+        {
+          id: 2, name: "Kvetináč z terakoty — set 3 ks", category: "Rastliny & Kvetináče", price: 22.5, stock: true, icon: "🪴",
+          description: "Set troch kvetináčov v teplej terakotovej farbe pre moderný aj rustikálny interiér.",
+          specs: ["Set: 3 veľkosti", "Materiál: terakota", "Odporúčané: interiér/exteriér pod prístreškom"],
+          photos: ["🪴", "🌱", "🧱"]
+        },
+        {
+          id: 3, name: "Minimalistická tlač A3", category: "Obrazy & Tlače", price: 18, stock: false, icon: "🖼️",
+          description: "Autorská tlač na kvalitnom papieri 300 g. Ideálna do obývačky alebo pracovne.",
+          specs: ["Formát: A3", "Papier: 300 g/m²", "Rám: nie je súčasťou balenia"],
+          photos: ["🖼️", "🎨", "📐"]
+        },
+        {
+          id: 4, name: "Darčekový balíček — Hygge home", category: "Darčeky", price: 36.9, stock: true, icon: "🎁",
+          description: "Balíček obľúbených domácich doplnkov pripravený ako hotový darček.",
+          specs: ["Obsah: 4 produkty", "Darčekové balenie: áno", "Možnosť venovania: áno"],
+          photos: ["🎁", "🧺", "💌"]
+        },
+        {
+          id: 5, name: "Nástenné zrkadlo — ratanový rám", category: "Dekorácie & Sviečky", price: 44.9, stock: false, icon: "🪞",
+          description: "Štýlové zrkadlo s ratanovým rámom, ktoré rozjasní menšie aj väčšie priestory.",
+          specs: ["Priemer: 50 cm", "Rám: prírodný ratan", "Montáž: záves na zadnej strane"],
+          photos: ["🪞", "🧶", "☀️"]
+        },
+        {
+          id: 6, name: "Umelá zelená stena 40×40 cm", category: "Rastliny & Kvetináče", price: 29, stock: true, icon: "🌿",
+          description: "Dekoračný panel so zelenými listami pre rýchlu premenu steny bez údržby.",
+          specs: ["Rozmer: 40×40 cm", "Použitie: interiér", "Údržba: bez polievania"],
+          photos: ["🌿", "🟩", "🧩"]
+        }
       ];
 
       const productsGrid = document.getElementById("productsGrid");
@@ -582,8 +746,23 @@
       const preorderProductText = document.getElementById("preorderProductText");
       const closePreorder = document.getElementById("closePreorder");
       const preorderForm = document.getElementById("preorderForm");
+      const productModal = document.getElementById("productModal");
+      const closeProductModalBtn = document.getElementById("closeProductModal");
+      const productDetailTitle = document.getElementById("productDetailTitle");
+      const productDetailCategory = document.getElementById("productDetailCategory");
+      const productDetailDesc = document.getElementById("productDetailDesc");
+      const productDetailSpecs = document.getElementById("productDetailSpecs");
+      const productDetailPrice = document.getElementById("productDetailPrice");
+      const productDetailAction = document.getElementById("productDetailAction");
+      const galleryMainVisual = document.getElementById("galleryMainVisual");
+      const galleryCaption = document.getElementById("galleryCaption");
+      const galleryThumbs = document.getElementById("galleryThumbs");
+      const galleryPrev = document.getElementById("galleryPrev");
+      const galleryNext = document.getElementById("galleryNext");
       let preorderProduct = null;
       let prevFocus = null;
+      let detailProduct = null;
+      let activePhotoIndex = 0;
 
       function euro(value) {
         return value.toLocaleString("sk-SK", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
@@ -614,7 +793,7 @@
 
         productsGrid.innerHTML = filtered.map((p) => `
           <article class="product">
-            <div class="thumb" aria-hidden="true">${p.icon}</div>
+            <button type="button" class="thumb" aria-label="Otvoriť detail produktu ${p.name}" data-open-detail="${p.id}">${p.icon}</button>
             <div class="product-body">
               <div class="meta">${p.category}</div>
               <p class="name">${p.name}</p>
@@ -628,6 +807,43 @@
             </div>
           </article>
         `).join("");
+      }
+
+      function renderGallery() {
+        if (!detailProduct) return;
+        const total = detailProduct.photos.length;
+        const photo = detailProduct.photos[activePhotoIndex];
+        galleryMainVisual.textContent = photo;
+        galleryCaption.textContent = `${activePhotoIndex + 1} / ${total}`;
+        galleryThumbs.innerHTML = detailProduct.photos.map((item, i) => `
+          <button type="button" class="thumb-btn ${i === activePhotoIndex ? "active" : ""}" data-photo-index="${i}" aria-label="Fotka ${i + 1}">
+            ${item}
+          </button>
+        `).join("");
+      }
+
+      function openProductModal(product) {
+        detailProduct = product;
+        activePhotoIndex = 0;
+        prevFocus = document.activeElement;
+        productDetailTitle.textContent = product.name;
+        productDetailCategory.textContent = product.category;
+        productDetailDesc.textContent = product.description;
+        productDetailPrice.textContent = euro(product.price);
+        productDetailSpecs.innerHTML = product.specs.map((item) => `<li>${item}</li>`).join("");
+        productDetailAction.dataset.id = String(product.id);
+        productDetailAction.dataset.action = product.stock ? "buy" : "preorder";
+        productDetailAction.textContent = product.stock ? "Do košíka" : "Predobjednať";
+        renderGallery();
+        productModal.classList.add("open");
+        productModal.setAttribute("aria-hidden", "false");
+      }
+
+      function closeProductModal() {
+        productModal.classList.remove("open");
+        productModal.setAttribute("aria-hidden", "true");
+        detailProduct = null;
+        if (prevFocus) prevFocus.focus();
       }
 
       function openSidebar() {
@@ -683,6 +899,13 @@
       });
 
       productsGrid.addEventListener("click", (event) => {
+        const detailBtn = event.target.closest("button[data-open-detail]");
+        if (detailBtn) {
+          const product = products.find((item) => item.id === Number(detailBtn.dataset.openDetail));
+          if (product) openProductModal(product);
+          return;
+        }
+
         const btn = event.target.closest("button[data-id]");
         if (!btn) return;
         const product = products.find((item) => item.id === Number(btn.dataset.id));
@@ -693,6 +916,32 @@
         } else {
           openPreorder(product);
         }
+      });
+
+      productDetailAction.addEventListener("click", () => {
+        if (!detailProduct) return;
+        if (productDetailAction.dataset.action === "buy") {
+          showToast(`Pridané do košíka: ${detailProduct.name}`);
+        } else {
+          openPreorder(detailProduct);
+        }
+      });
+
+      galleryThumbs.addEventListener("click", (event) => {
+        const thumb = event.target.closest("button[data-photo-index]");
+        if (!thumb || !detailProduct) return;
+        activePhotoIndex = Number(thumb.dataset.photoIndex);
+        renderGallery();
+      });
+      galleryPrev.addEventListener("click", () => {
+        if (!detailProduct) return;
+        activePhotoIndex = (activePhotoIndex - 1 + detailProduct.photos.length) % detailProduct.photos.length;
+        renderGallery();
+      });
+      galleryNext.addEventListener("click", () => {
+        if (!detailProduct) return;
+        activePhotoIndex = (activePhotoIndex + 1) % detailProduct.photos.length;
+        renderGallery();
       });
 
       preorderForm.addEventListener("submit", (event) => {
@@ -709,14 +958,19 @@
       closeSidebarBtn.addEventListener("click", closeSidebar);
       overlay.addEventListener("click", closeSidebar);
       closePreorder.addEventListener("click", closePreorderModal);
+      closeProductModalBtn.addEventListener("click", closeProductModal);
       preorderModal.addEventListener("click", (e) => {
         if (e.target === preorderModal) closePreorderModal();
+      });
+      productModal.addEventListener("click", (e) => {
+        if (e.target === productModal) closeProductModal();
       });
 
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           if (sidebar.classList.contains("open")) closeSidebar();
           if (preorderModal.classList.contains("open")) closePreorderModal();
+          if (productModal.classList.contains("open")) closeProductModal();
         }
       });
 
