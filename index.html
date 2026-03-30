@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Varko – Dekorácie &amp; Darčeky</title>
-  <meta name="description" content="Varko ponúka dekorácie, sviečky a darčeky. Nakupujte skladom aj na predobjednávku, filtrujte produkty podľa ceny a kategórie." />
+  <meta name="description" content="Varko ponúka dekorácie, sviečky a darčeky. Nakupujte skladové produkty, prehliadajte detail produktov a filtrujte podľa ceny a kategórie." />
   <meta name="theme-color" content="#F7F5F2" />
   <meta name="robots" content="index,follow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -313,6 +313,10 @@
       min-height: 38px;
     }
     .btn-buy:hover { background: var(--accent); }
+    .btn-buy:disabled {
+      background: #c5c1b8;
+      cursor: not-allowed;
+    }
 
     .empty-state {
       border: 1px dashed var(--border);
@@ -368,24 +372,6 @@
       padding: 1rem;
     }
     .modal.open { display: flex; }
-    .modal-card {
-      background: var(--surface);
-      border-radius: 12px;
-      width: min(560px, 100%);
-      border: 1px solid var(--border);
-      padding: 1.2rem;
-    }
-    .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
-    .modal-form { display: grid; gap: .7rem; margin-top: .8rem; }
-    .modal-form input, .modal-form textarea {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: .62rem;
-      font: inherit;
-      width: 100%;
-    }
-    .modal-note { color: var(--muted); font-size: .85rem; }
-
     .product-modal-card {
       background: var(--surface);
       border-radius: 12px;
@@ -536,7 +522,7 @@
     <div class="top-strip">
       <span>🏪 <strong>Vyzdvihnutie zdarma</strong></span>
       <span>📦 Doručenie na objednávku (platba vopred)</span>
-      <span>🛒 Predobjednávky mimo skladu sú dostupné</span>
+      <span>ℹ️ Pri nedostupnosti produktu zobrazujeme stav <strong>Vypredané</strong></span>
     </div>
 
     <nav class="nav" aria-label="Hlavná navigácia">
@@ -559,7 +545,7 @@
       <div>
         <p style="font-size:.78rem;letter-spacing:.11em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:0">Dekorácie · Darčeky · Slovensko</p>
         <h1 id="hero-title">Váš domov,<br /><em>váš štýl.</em></h1>
-        <p>Pripravené pre reálny predaj: okamžitý nákup skladových produktov, predobjednávky pri nedostupnom tovare a filtrovanie ponuky podľa ceny.</p>
+        <p>Pripravené pre reálny predaj: okamžitý nákup skladových produktov, detailné zobrazenie produktov a filtrovanie ponuky podľa ceny.</p>
         <div class="hero-actions">
           <a href="#produkty" class="btn btn-primary">Prejsť na produkty</a>
           <a href="#dorucenie" class="btn btn-secondary">Doručenie</a>
@@ -574,7 +560,7 @@
 
     <section id="produkty" class="section" aria-labelledby="products-title">
       <h2 id="products-title">Produkty</h2>
-      <p class="section-sub">Filtrujte podľa kategórie a ceny. Ak niečo nie je skladom, môžete to hneď predobjednať.</p>
+      <p class="section-sub">Filtrujte podľa kategórie a ceny. Nedostupné produkty sú označené ako vypredané.</p>
 
       <div class="filters" role="region" aria-label="Filtre produktov">
         <div>
@@ -630,6 +616,10 @@
     <section id="o-nas" class="section" aria-labelledby="about-title">
       <h2 id="about-title">Prečo Varko?</h2>
       <p class="section-sub">Malý tím, výberová ponuka, rýchla komunikácia a férové podmienky.</p>
+      <article class="delivery-card" style="max-width:620px">
+        <h3>Nenašli ste, čo potrebujete?</h3>
+        <p>Ak vám v ponuke niečo chýba, napíšte nám na <a href="mailto:info@varko.sk">info@varko.sk</a> a radi preveríme dostupné alternatívy.</p>
+      </article>
     </section>
   </main>
 
@@ -637,22 +627,6 @@
     <span class="logo" style="font-size:1.2rem">Var<span>ko</span></span>
     <span>© 2026 Varko s.r.o. · Slovensko</span>
   </footer>
-
-  <div id="preorderModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="preorderTitle" aria-hidden="true">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h3 id="preorderTitle" style="margin:0">Predobjednávka produktu</h3>
-        <button type="button" id="closePreorder" aria-label="Zatvoriť predobjednávku">✕</button>
-      </div>
-      <p class="modal-note" id="preorderProductText">Produkt:</p>
-      <form id="preorderForm" class="modal-form">
-        <input type="text" id="customerName" placeholder="Vaše meno" required />
-        <input type="email" id="customerEmail" placeholder="E-mail" required />
-        <textarea id="customerNote" rows="3" placeholder="Poznámka (voliteľné)"></textarea>
-        <button type="submit" class="btn btn-primary">Odoslať predobjednávku</button>
-      </form>
-    </div>
-  </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
@@ -742,10 +716,6 @@
       const openSidebarBtn = document.getElementById("openSidebar");
       const closeSidebarBtn = document.getElementById("closeSidebar");
 
-      const preorderModal = document.getElementById("preorderModal");
-      const preorderProductText = document.getElementById("preorderProductText");
-      const closePreorder = document.getElementById("closePreorder");
-      const preorderForm = document.getElementById("preorderForm");
       const productModal = document.getElementById("productModal");
       const closeProductModalBtn = document.getElementById("closeProductModal");
       const productDetailTitle = document.getElementById("productDetailTitle");
@@ -759,7 +729,6 @@
       const galleryThumbs = document.getElementById("galleryThumbs");
       const galleryPrev = document.getElementById("galleryPrev");
       const galleryNext = document.getElementById("galleryNext");
-      let preorderProduct = null;
       let prevFocus = null;
       let detailProduct = null;
       let activePhotoIndex = 0;
@@ -800,8 +769,8 @@
               <span class="stock ${p.stock ? "in" : "out"}">${p.stock ? "Skladom" : "Mimo skladu"}</span>
               <div class="bottom">
                 <span class="price">${euro(p.price)}</span>
-                <button type="button" class="btn-buy" data-action="${p.stock ? "buy" : "preorder"}" data-id="${p.id}">
-                  ${p.stock ? "Do košíka" : "Predobjednať"}
+                <button type="button" class="btn-buy" data-action="${p.stock ? "buy" : "soldout"}" data-id="${p.id}" ${p.stock ? "" : "disabled aria-disabled=\"true\" title=\"Tento produkt je vypredaný\""}>
+                  ${p.stock ? "Do košíka" : "Vypredané"}
                 </button>
               </div>
             </div>
@@ -832,8 +801,10 @@
         productDetailPrice.textContent = euro(product.price);
         productDetailSpecs.innerHTML = product.specs.map((item) => `<li>${item}</li>`).join("");
         productDetailAction.dataset.id = String(product.id);
-        productDetailAction.dataset.action = product.stock ? "buy" : "preorder";
-        productDetailAction.textContent = product.stock ? "Do košíka" : "Predobjednať";
+        productDetailAction.dataset.action = product.stock ? "buy" : "soldout";
+        productDetailAction.textContent = product.stock ? "Do košíka" : "Vypredané";
+        productDetailAction.disabled = !product.stock;
+        productDetailAction.setAttribute("aria-disabled", String(!product.stock));
         renderGallery();
         productModal.classList.add("open");
         productModal.setAttribute("aria-hidden", "false");
@@ -867,23 +838,6 @@
         if (prevFocus) prevFocus.focus();
       }
 
-      function openPreorder(product) {
-        preorderProduct = product;
-        preorderProductText.textContent = `Produkt: ${product.name} (${euro(product.price)})`;
-        preorderModal.classList.add("open");
-        preorderModal.setAttribute("aria-hidden", "false");
-        prevFocus = document.activeElement;
-        document.getElementById("customerName").focus();
-      }
-
-      function closePreorderModal() {
-        preorderModal.classList.remove("open");
-        preorderModal.setAttribute("aria-hidden", "true");
-        preorderForm.reset();
-        preorderProduct = null;
-        if (prevFocus) prevFocus.focus();
-      }
-
       maxPrice.addEventListener("input", () => {
         maxPriceValue.textContent = maxPrice.value;
         renderProducts();
@@ -913,8 +867,8 @@
 
         if (btn.dataset.action === "buy") {
           showToast(`Pridané do košíka: ${product.name}`);
-        } else {
-          openPreorder(product);
+        } else if (btn.dataset.action === "soldout") {
+          showToast(`Produkt je momentálne vypredaný: ${product.name}`);
         }
       });
 
@@ -922,8 +876,8 @@
         if (!detailProduct) return;
         if (productDetailAction.dataset.action === "buy") {
           showToast(`Pridané do košíka: ${detailProduct.name}`);
-        } else {
-          openPreorder(detailProduct);
+        } else if (productDetailAction.dataset.action === "soldout") {
+          showToast(`Produkt je momentálne vypredaný: ${detailProduct.name}`);
         }
       });
 
@@ -944,24 +898,10 @@
         renderGallery();
       });
 
-      preorderForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        if (!preorderProduct) return;
-        const name = document.getElementById("customerName").value.trim();
-        const email = document.getElementById("customerEmail").value.trim();
-        if (!name || !email) return;
-        showToast(`Predobjednávka odoslaná: ${preorderProduct.name}`);
-        closePreorderModal();
-      });
-
       openSidebarBtn.addEventListener("click", openSidebar);
       closeSidebarBtn.addEventListener("click", closeSidebar);
       overlay.addEventListener("click", closeSidebar);
-      closePreorder.addEventListener("click", closePreorderModal);
       closeProductModalBtn.addEventListener("click", closeProductModal);
-      preorderModal.addEventListener("click", (e) => {
-        if (e.target === preorderModal) closePreorderModal();
-      });
       productModal.addEventListener("click", (e) => {
         if (e.target === productModal) closeProductModal();
       });
@@ -969,7 +909,6 @@
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           if (sidebar.classList.contains("open")) closeSidebar();
-          if (preorderModal.classList.contains("open")) closePreorderModal();
           if (productModal.classList.contains("open")) closeProductModal();
         }
       });
