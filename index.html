@@ -577,6 +577,7 @@
         <div>
           <label for="availabilityFilter">Dostupnosť</label>
           <select id="availabilityFilter">
+            <option value="all">Skladom aj vypredané</option>
             <option value="in">Len skladom</option>
             <option value="out">Len vypredané</option>
           </select>
@@ -765,7 +766,7 @@
             <div class="product-body">
               <div class="meta">${p.category}</div>
               <p class="name">${p.name}</p>
-              <span class="stock ${p.stock ? "in" : "out"}">${p.stock ? "Skladom" : "Mimo skladu"}</span>
+              <span class="stock ${p.stock ? "in" : "out"}">${p.stock ? "Skladom" : "Vypredané"}</span>
               <div class="bottom">
                 <span class="price">${euro(p.price)}</span>
                 <button type="button" class="btn-buy" data-action="${p.stock ? "buy" : "soldout"}" data-id="${p.id}" ${p.stock ? "" : "disabled aria-disabled=\"true\" title=\"Tento produkt je vypredaný\""}>
