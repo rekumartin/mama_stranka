@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Varko – Dekorácie &amp; Darčeky</title>
+  <meta name="description" content="Varko ponúka štýlové dekorácie, sviečky a darčeky. Osobné vyzdvihnutie v predajni alebo doručenie na adresu na objednávku." />
+  <meta name="theme-color" content="#F7F5F2" />
+  <meta name="robots" content="index,follow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --bg: #F7F5F2;
+      --surface: #FFFFFF;
+      --text: #1A1A18;
+      --muted: #64625b;
+      --accent: #C8633A;
+      --accent-dark: #a64d2a;
+      --border: #E2DFD9;
+      --focus: #0f62fe;
+      --serif: "DM Serif Display", Georgia, serif;
+      --sans: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --sidebar-w: min(88vw, 300px);
+      --radius: 12px;
+      --shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+      --max-w: 1200px;
+    }
+
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-weight: 300;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+    }
+
+    img, svg { display: block; max-width: 100%; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+      white-space: nowrap;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 0.5rem;
+      top: -100px;
+      background: var(--text);
+      color: #fff;
+      padding: 0.6rem 0.9rem;
+      border-radius: 8px;
+      z-index: 500;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .skip-link:focus-visible { top: 0.5rem; }
+
+    a, button { font: inherit; }
+    a:focus-visible,
+    button:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 199;
+      background: rgba(0, 0, 0, 0.38);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-w);
+      background: var(--surface);
+      z-index: 200;
+      transform: translateX(-100%);
+      transition: transform 0.32s cubic-bezier(.4, 0, .2, 1);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 1.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo,
+    .logo,
+    .footer-logo {
+      font-family: var(--serif);
+      color: var(--text);
+      text-decoration: none;
+    }
+    .sidebar-logo { font-size: 1.4rem; }
+    .logo { font-size: 1.5rem; letter-spacing: -0.02em; }
+    .footer-logo { font-size: 1.2rem; }
+    .sidebar-logo span,
+    .logo span,
+    .footer-logo span {
+      color: var(--accent);
+    }
+
+    .sidebar-close,
+    .hamburger {
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .sidebar-close {
+      color: var(--muted);
+      font-size: 1.3rem;
+      line-height: 1;
+      padding: 4px 7px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .sidebar-close:hover { color: var(--text); background: var(--bg); }
+
+    .sidebar-nav { padding: 0.8rem 0; flex: 1; }
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.7rem 1.5rem;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.92rem;
+      font-weight: 400;
+      border-left: 3px solid transparent;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .sidebar-nav a:hover,
+    .sidebar-nav a:focus-visible {
+      background: var(--bg);
+      border-left-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .sidebar-section {
+      font-size: 0.67rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 1.1rem 1.5rem 0.3rem;
+      font-weight: 700;
+    }
+
+    .sidebar-nav hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 0.5rem 0;
+    }
+
+    .sidebar-delivery {
+      margin: 0 1rem 1.2rem;
+      background: #FEF6F1;
+      border: 1px solid #F5D5C2;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      font-size: 0.82rem;
+    }
+    .sidebar-delivery strong {
+      color: var(--accent);
+      display: block;
+      margin-bottom: 0.35rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+    .sidebar-delivery p { color: var(--muted); line-height: 1.5; margin: 0; }
+    .sidebar-delivery em { font-style: normal; color: var(--accent); font-weight: 700; }
+
+    .top-strip {
+      background: var(--text);
+      color: #fff;
+      text-align: center;
+      padding: 0.55rem 5%;
+      font-size: 0.82rem;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .top-strip span { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .top-strip strong { color: #F5C9A8; font-weight: 700; }
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(247, 245, 242, 0.93);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      gap: 1rem;
+    }
+    .nav-left { display: flex; align-items: center; gap: 1rem; }
+
+    .hamburger {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      padding: 6px;
+      transition: background 0.15s;
+    }
+    .hamburger:hover { background: var(--border); }
+    .hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover,
+    .nav-links a:focus-visible { color: var(--text); }
+
+    .nav-cta {
+      background: var(--text);
+      color: #fff !important;
+      padding: 0.45rem 1.1rem;
+      border-radius: 6px;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover,
+    .nav-cta:focus-visible { background: var(--accent) !important; }
+
+    .hero {
+      padding: 6rem 5% 5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin: 0 0 1.4rem;
+    }
+    .hero h1 em { font-style: italic; color: var(--accent); }
+    .hero > div > p { color: var(--muted); font-size: 1.05rem; max-width: 420px; margin: 0 0 2.2rem; }
+
+    .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-primary,
+    .btn-outline,
+    .btn-white {
+      display: inline-block;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      padding: 0.75rem 1.8rem;
+    }
+    .btn-primary:hover,
+    .btn-primary:focus-visible {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+    }
+    .btn-outline {
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 0.75rem 1.8rem;
+    }
+    .btn-outline:hover,
+    .btn-outline:focus-visible {
+      border-color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .hero-visual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 14px;
+    }
+    .card-img {
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      transition: transform 0.3s;
+      animation: fadeUp 0.7s ease both;
+    }
+    .card-img:nth-child(1) { animation-delay: 0.15s; }
+    .card-img:nth-child(2) { animation-delay: 0.25s; grid-row: span 2; aspect-ratio: auto; }
+    .card-img:nth-child(3) { animation-delay: 0.35s; }
+    .card-img:hover { transform: translateY(-3px); }
+    .card-img .inner { text-align: center; }
+    .card-img .tag {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-top: 0.5rem;
+    }
+
+    .stats-bar {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .stats-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 2rem 5%;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: var(--serif);
+      font-size: 2rem;
+      color: var(--text);
+      display: block;
+      line-height: 1.1;
+    }
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    section {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 5rem 5%;
+    }
+    .section-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      letter-spacing: -0.02em;
+      margin: 0 0 0.5rem;
+    }
+    .section-sub { color: var(--muted); font-size: 0.95rem; margin: 0 0 2.5rem; }
+
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .cat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.8rem 1.5rem;
+      transition: box-shadow 0.25s, transform 0.2s, border-color 0.2s;
+      text-decoration: none;
+      color: var(--text);
+      display: block;
+    }
+    .cat-card:hover,
+    .cat-card:focus-visible {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+      border-color: var(--accent);
+    }
+    .cat-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .cat-name { font-weight: 700; font-size: 1rem; margin-bottom: 0.3rem; }
+    .cat-count { font-size: 0.8rem; color: var(--muted); }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.2rem;
+    }
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+    }
+    .product-thumb {
+      background: var(--bg);
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .product-body { padding: 1.2rem; }
+    .product-cat {
+      font-size: 0.72rem;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0 0 0.4rem;
+      font-weight: 700;
+    }
+    .product-name { font-weight: 500; font-size: 0.95rem; margin: 0; }
+    .product-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1rem;
+      gap: 0.6rem;
+    }
+    .product-price { font-family: var(--serif); font-size: 1.2rem; }
+
+    .btn-buy {
+      background: var(--text);
+      color: #fff;
+      border: none;
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      min-height: 40px;
+    }
+    .btn-buy:hover,
+    .btn-buy:focus-visible { background: var(--accent); }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+    .badge-new { background: #EEF5EE; color: #3A7A3A; }
+    .badge-sale { background: #FEF0EB; color: var(--accent); }
+
+    .delivery-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .delivery-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 4rem 5%;
+    }
+    .delivery-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .delivery-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem 1.8rem;
+      background: var(--bg);
+      display: flex;
+      gap: 1.2rem;
+      align-items: flex-start;
+    }
+    .delivery-card.highlight { background: var(--surface); border-color: var(--accent); }
+    .dicon { font-size: 2rem; flex-shrink: 0; margin-top: 0.1rem; }
+    .delivery-card h3 { font-weight: 700; font-size: 1rem; margin: 0 0 0.5rem; }
+    .delivery-card p { font-size: 0.86rem; color: var(--muted); line-height: 1.6; margin: 0; }
+
+    .dnote {
+      display: inline-block;
+      margin-top: 0.8rem;
+      background: #FEF0EB;
+      color: var(--accent);
+      font-size: 0.75rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+    .dnote-green { background: #EEF5EE; color: #3A7A3A; }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    .why-card {
+      padding: 1.8rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .why-icon { font-size: 1.6rem; margin-bottom: 1rem; }
+    .why-title { font-weight: 700; margin: 0 0 0.4rem; }
+    .why-text { font-size: 0.88rem; color: var(--muted); margin: 0; }
+
+    .cta-wrap { padding: 0 5%; max-width: var(--max-w); margin: 0 auto 5rem; }
+    .cta-banner {
+      background: var(--text);
+      color: #fff;
+      border-radius: 16px;
+      padding: 3.5rem;
+      text-align: center;
+    }
+    .cta-banner h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      margin: 0 0 0.8rem;
+    }
+    .cta-banner p { color: rgba(255, 255, 255, 0.75); margin: 0 0 2rem; font-size: 1rem; }
+
+    .btn-white {
+      background: #fff;
+      color: var(--text);
+      padding: 0.8rem 2rem;
+      font-size: 0.9rem;
+    }
+    .btn-white:hover,
+    .btn-white:focus-visible {
+      background: var(--bg);
+      transform: translateY(-1px);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      padding: 2.5rem 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover,
+    footer a:focus-visible { color: var(--text); }
+    .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+
+    @media (max-width: 900px) {
+      .delivery-cards { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; padding-top: 4rem; }
+      .hero-visual { display: none; }
+      .site-nav { padding: 0 4%; }
+      .nav-links { display: none; }
+      .cta-banner { padding: 2.3rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Preskočiť na obsah</a>
+
+  <div class="overlay" id="overlay" hidden></div>
+
+  <aside class="sidebar" id="sidebar" aria-label="Bočné menu" aria-hidden="true">
+    <div class="sidebar-header">
+      <a class="sidebar-logo" href="#">Var<span>ko</span></a>
+      <button type="button" class="sidebar-close" id="sidebarCloseBtn" aria-label="Zatvoriť menu">✕</button>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Navigácia v bočnom menu">
+      <a href="#">🏠 Domov</a>
+      <div class="sidebar-section">Kategórie</div>
+      <a href="#kategorie">🕯️ Dekorácie &amp; Sviečky</a>
+      <a href="#kategorie">🪴 Rastliny &amp; Kvetináče</a>
+      <a href="#kategorie">🖼️ Obrazy &amp; Tlače</a>
+      <a href="#kategorie">🪑 Nábytok &amp; Doplnky</a>
+      <a href="#kategorie">🎁 Darčeky</a>
+      <a href="#kategorie">✨ Všetky produkty</a>
+      <hr />
+      <div class="sidebar-section">Informácie</div>
+      <a href="#dorucenie">🚚 Doručenie &amp; Vyzdvihnutie</a>
+      <a href="#o-nas">ℹ️ O nás</a>
+      <a href="mailto:info@varko.sk">📞 Kontakt</a>
+      <hr />
+      <div class="sidebar-section">Môj účet</div>
+      <a href="#">👤 Prihlásenie</a>
+      <a href="#">🛒 Košík</a>
+      <a href="#">❤️ Obľúbené</a>
+      <hr />
+      <div class="sidebar-section">Právne</div>
+      <a href="#">📄 Obchodné podmienky</a>
+      <a href="#">🔒 Ochrana osobných údajov</a>
+      <a href="#">↩️ Vrátenie tovaru</a>
+    </nav>
+
+    <div class="sidebar-delivery">
+      <strong>📦 Ako to funguje?</strong>
+      <p>Tovar si môžete vyzdvihnúť osobne v predajni, alebo ho doručíme na vašu adresu na objednávku. Doručenie na adresu vyžaduje <em>platbu vopred</em>.</p>
+    </div>
+  </aside>
+
+  <header>
+    <div class="top-strip" role="status" aria-live="polite">
+      <span>🏪 <strong>Osobné vyzdvihnutie</strong> v predajni — zdarma</span>
+      <span>📦 <strong>Doručenie na adresu</strong> na objednávku · vyžaduje platbu vopred</span>
+    </div>
+
+    <nav class="site-nav" aria-label="Hlavná navigácia">
+      <div class="nav-left">
+        <button
+          type="button"
+          class="hamburger"
+          id="menuToggleBtn"
+          aria-label="Otvoriť menu"
+          aria-expanded="false"
+          aria-controls="sidebar"
+        >
+          <span></span><span></span><span></span>
+        </button>
+        <a class="logo" href="#">Var<span>ko</span></a>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="#kategorie">Kategórie</a></li>
+        <li><a href="#produkty">Produkty</a></li>
+        <li><a href="#dorucenie">Doručenie</a></li>
+        <li><a href="#o-nas">O nás</a></li>
+        <li><a class="nav-cta" href="#produkty">Nakupovať</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <p class="hero-label">Interiérové dekorácie · Slovensko</p>
+        <h1 id="hero-title">Váš domov,<br /><em>váš štýl.</em></h1>
+        <p>Prinášame vám starostlivo vybrané dekorácie, sviečky a bytové doplnky — s láskou a za férové ceny.</p>
+        <div class="btn-group">
+          <a href="#produkty" class="btn-primary">Prezerať produkty</a>
+          <a href="#dorucenie" class="btn-outline">Ako nakúpiť?</a>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="card-img"><div class="inner">🕯️<span class="tag">Sviečky</span></div></div>
+        <div class="card-img"><div class="inner">🪴<span class="tag">Rastliny</span></div></div>
+        <div class="card-img"><div class="inner">🖼️<span class="tag">Obrazy</span></div></div>
+      </div>
+    </section>
+
+    <section class="stats-bar" aria-label="Štatistiky obchodu">
+      <h2 class="sr-only">Štatistiky</h2>
+      <div class="stats-inner">
+        <div class="stat"><span class="stat-num">300+</span><span class="stat-label">Produktov v ponuke</span></div>
+        <div class="stat"><span class="stat-num">4.9★</span><span class="stat-label">Hodnotenie zákazníkov</span></div>
+        <div class="stat"><span class="stat-num">🏪</span><span class="stat-label">Vlastná predajňa</span></div>
+        <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Spokojnosť alebo vrátenie</span></div>
+      </div>
+    </section>
+
+    <section id="kategorie" aria-labelledby="kategorie-title">
+      <p class="section-label">Čo hľadáte?</p>
+      <h2 class="section-title" id="kategorie-title">Kategórie</h2>
+      <p class="section-sub">Od jemných sviečok až po výrazné obrazy — všetko na skrášlenie vášho domova.</p>
+
+      <div class="categories-grid">
+        <a class="cat-card" href="#produkty"><div class="cat-icon">🕯️</div><div class="cat-name">Dekorácie &amp; Sviečky</div><div class="cat-count">64 produktov</div></a>
+        <a class="cat-card" href="#produkty"><div class="cat-icon">🪴</div><div class="cat-name">Rastliny &amp; Kvetináče</div><div class="cat-count">38 produktov</div></a>
+        <a class="cat-card" href="#produkty"><div class="cat-icon">🖼️</div><div class="cat-name">Obrazy &amp; Tlače</div><div class="cat-count">52 produktov</div></a>
+        <a class="cat-card" href="#produkty"><div class="cat-icon">🪑</div><div class="cat-name">Nábytok &amp; Doplnky</div><div class="cat-count">45 produktov</div></a>
+        <a class="cat-card" href="#produkty"><div class="cat-icon">🎁</div><div class="cat-name">Darčeky</div><div class="cat-count">29 produktov</div></a>
+        <a class="cat-card" href="#produkty"><div class="cat-icon">✨</div><div class="cat-name">Všetky produkty</div><div class="cat-count">228 produktov</div></a>
+      </div>
+    </section>
+
+    <section id="produkty" aria-labelledby="produkty-title" style="padding-top: 0">
+      <p class="section-label">Aktuálna ponuka</p>
+      <h2 class="section-title" id="produkty-title">Odporúčané produkty</h2>
+      <p class="section-sub">Vybrané kúsky, ktoré zákazníci milujú.</p>
+
+      <div class="products-grid">
+        <article class="product-card">
+          <div class="product-thumb" aria-hidden="true">🕯️</div>
+          <div class="product-body">
+            <p class="product-cat">Dekorácie &amp; Sviečky</p>
+            <p class="product-name">Aromatická sójová sviečka <span class="badge badge-new">Nové</span></p>
+            <div class="product-footer"><span class="product-price">14,90 €</span><button type="button" class="btn-buy">Do košíka</button></div>
+          </div>
+        </article>
+
+        <article class="product-card">
+          <div class="product-thumb" aria-hidden="true">🪴</div>
+          <div class="product-body">
+            <p class="product-cat">Rastliny &amp; Kvetináče</p>
+            <p class="product-name">Kvetináč z terakoty — set 3 ks <span class="badge badge-sale">Akcia</span></p>
+            <div class="product-footer"><span class="product-price">22,50 €</span><button type="button" class="btn-buy">Do košíka</button></div>
+          </div>
+        </article>
+
+        <article class="product-card">
+          <div class="product-thumb" aria-hidden="true">🖼️</div>
+          <div class="product-body">
+            <p class="product-cat">Obrazy &amp; Tlače</p>
+            <p class="product-name">Minimalistická tlač A3</p>
+            <div class="product-footer"><span class="product-price">18,00 €</span><button type="button" class="btn-buy">Do košíka</button></div>
+          </div>
+        </article>
+
+        <article class="product-card">
+          <div class="product-thumb" aria-hidden="true">🪞</div>
+          <div class="product-body">
+            <p class="product-cat">Nábytok &amp; Doplnky</p>
+            <p class="product-name">Nástenné zrkadlo — ratanový rám <span class="badge badge-new">Nové</span></p>
+            <div class="product-footer"><span class="product-price">44,90 €</span><button type="button" class="btn-buy">Do košíka</button></div>
+          </div>
+        </article>
+
+        <article class="product-card">
+          <div class="product-thumb" aria-hidden="true">🎁</div>
+          <div class="product-body">
+            <p class="product-cat">Darčeky</p>
+            <p class="product-name">Darčekový balíček — Hygge home</p>
+            <div class="product-footer"><span class="product-price">36,90 €</span><button type="button" class="btn-buy">Do košíka</button></div>
+          </div>
+        </article>
+
+        <article class="product-card">
+          <div class="product-thumb" aria-hidden="true">🌿</div>
+          <div class="product-body">
+            <p class="product-cat">Dekorácie</p>
+            <p class="product-name">Umelá zelená stena 40×40 cm <span class="badge badge-sale">Akcia</span></p>
+            <div class="product-footer"><span class="product-price">29,00 €</span><button type="button" class="btn-buy">Do košíka</button></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="delivery-section" id="dorucenie" aria-labelledby="dorucenie-title">
+      <div class="delivery-inner">
+        <p class="section-label">Ako to funguje?</p>
+        <h2 class="section-title" id="dorucenie-title">Doručenie &amp; Vyzdvihnutie</h2>
+        <div class="delivery-cards">
+          <article class="delivery-card">
+            <div class="dicon" aria-hidden="true">🏪</div>
+            <div>
+              <h3>Osobné vyzdvihnutie v predajni</h3>
+              <p>Navštívte nás osobne a tovar si vyzdvihnite priamo v predajni. Platíte na mieste — hotovosťou alebo kartou. Bez poplatkov, bez čakania na kuriéra.</p>
+              <span class="dnote dnote-green">Zdarma · Platba na mieste</span>
+            </div>
+          </article>
+
+          <article class="delivery-card highlight">
+            <div class="dicon" aria-hidden="true">📦</div>
+            <div>
+              <h3>Doručenie na adresu</h3>
+              <p>Tovar doručíme priamo k vám domov. Objednávku vybavíme po prijatí platby. Termín a podmienky doručenia sa dohodujú individuálne pri objednávke.</p>
+              <span class="dnote">⚠️ Vyžaduje platbu vopred</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="o-nas" aria-labelledby="onas-title" style="padding-top: 4rem">
+      <p class="section-label">Prečo Varko?</p>
+      <h2 class="section-title" id="onas-title">Robíme to s chuťou.</h2>
+      <p class="section-sub">Sme malý obchod s veľkým dôrazom na detail a spokojnosť zákazníka.</p>
+
+      <div class="why-grid">
+        <article class="why-card"><div class="why-icon" aria-hidden="true">✅</div><p class="why-title">Overená kvalita</p><p class="why-text">Každý produkt vyberáme osobne. Nič, čo by sme sami nekúpili, u nás nenájdete.</p></article>
+        <article class="why-card"><div class="why-icon" aria-hidden="true">🏪</div><p class="why-title">Vlastná predajňa</p><p class="why-text">Môžete prísť osobne, pozrieť si tovar naživo a vyzdvihnúť hneď na mieste.</p></article>
+        <article class="why-card"><div class="why-icon" aria-hidden="true">🔄</div><p class="why-title">Vrátenie do 14 dní</p><p class="why-text">Nie ste spokojní? Riešime to férovo a bez komplikácií.</p></article>
+        <article class="why-card"><div class="why-icon" aria-hidden="true">💬</div><p class="why-title">Ľudský prístup</p><p class="why-text">Sme tu pre vás — napíšte nám, zavolajte, príďte. Odpovedáme rýchlo.</p></article>
+      </div>
+    </section>
+
+    <div class="cta-wrap">
+      <section class="cta-banner" aria-labelledby="cta-title">
+        <h2 id="cta-title">Nenašli ste, čo ste hľadali?</h2>
+        <p>Napíšte nám — radi vám poradíme alebo produkt nájdeme špeciálne pre vás.</p>
+        <a href="mailto:info@varko.sk" class="btn-white">Kontaktovať nás</a>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <span class="footer-logo">Var<span>ko</span></span>
+    <nav class="footer-links" aria-label="Päta stránky">
+      <a href="#">Obchodné podmienky</a>
+      <a href="#">GDPR</a>
+      <a href="#">Vrátenie tovaru</a>
+      <a href="mailto:info@varko.sk">Kontakt</a>
+    </nav>
+    <span>© 2026 Varko s.r.o. · Slovensko</span>
+  </footer>
+
+  <script>
+    (() => {
+      const body = document.body;
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("overlay");
+      const menuToggleBtn = document.getElementById("menuToggleBtn");
+      const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
+      const sidebarLinks = sidebar.querySelectorAll("a");
+      let previousFocus = null;
+
+      const openSidebar = () => {
+        previousFocus = document.activeElement;
+        sidebar.classList.add("open");
+        sidebar.setAttribute("aria-hidden", "false");
+        overlay.classList.add("open");
+        overlay.hidden = false;
+        menuToggleBtn.setAttribute("aria-expanded", "true");
+        body.style.overflow = "hidden";
+        sidebarCloseBtn.focus();
+      };
+
+      const closeSidebar = () => {
+        sidebar.classList.remove("open");
+        sidebar.setAttribute("aria-hidden", "true");
+        overlay.classList.remove("open");
+        menuToggleBtn.setAttribute("aria-expanded", "false");
+        body.style.overflow = "";
+        window.setTimeout(() => {
+          overlay.hidden = true;
+        }, 300);
+
+        if (previousFocus && typeof previousFocus.focus === "function") {
+          previousFocus.focus();
+        } else {
+          menuToggleBtn.focus();
+        }
+      };
+
+      menuToggleBtn.addEventListener("click", openSidebar);
+      sidebarCloseBtn.addEventListener("click", closeSidebar);
+      overlay.addEventListener("click", closeSidebar);
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && sidebar.classList.contains("open")) {
+          closeSidebar();
+        }
+
+        if (event.key === "Tab" && sidebar.classList.contains("open")) {
+          const focusable = [sidebarCloseBtn, ...sidebarLinks].filter((el) => !el.hasAttribute("disabled"));
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
+      });
+
+      sidebarLinks.forEach((link) => {
+        link.addEventListener("click", () => {
+          if (sidebar.classList.contains("open")) closeSidebar();
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
